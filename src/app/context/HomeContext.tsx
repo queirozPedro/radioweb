@@ -1,72 +1,93 @@
 'use client'
 
-import React, {createContext, ReactNode, useEffect, useState} from 'react';
+import React, { createContext, ReactNode, useEffect, useState, useRef } from 'react';
+import { musics } from '../dados/music';
 
-// Um tipo de dado que define quais dados e operações serão criados
 type HomeContextData = {
     contadorMusica: number;
     quantidadeMusicas: number;
     playing: boolean;
+    nomeMusica: string
     
     passarMusica: () => void;
     voltarMusica: () => void;
+    selecionarMusica: () => void;
     configPlayPause: () => void;
 }
 
-export const HomeConstext = createContext({} as HomeContextData);
+export const HomeContext = createContext<HomeContextData | undefined>(undefined); 
 
 type ProviderProps = {
     children: ReactNode;
 }
 
-// Vai porver as informações
-const HomeContextProvider = ({children}:ProviderProps) => {    
+const HomeContextProvider = ({children}: ProviderProps) => {    
     const [playing, setPlay] = useState(false);
-    const [contadorMusica, setMusica] = useState(1);
-    const [quantidadeMusicas, setQuantMusicas] = useState(20);
-    const [audio, setAudio] = useState<HTMLAudioElement>();
+    const [contadorMusica, setMusica] = useState(0);
+    const [quantidadeMusicas] = useState(musics.length); 
+    const [audio, setAudio] = useState<HTMLAudioElement>(); 
+    const [nomeMusica, setNomeMusica] = useState(""); 
+    const audioRef = useRef<HTMLAudioElement >();
     
-    useEffect(()=>{
-        const newAudio = new Audio("audios/KocchiNoKento.mp3");
+    useEffect(() => {
+        const currentMusic = musics[contadorMusica]; 
+        const newAudio = new Audio(currentMusic.urlAudio);
         setAudio(newAudio);
-    }, [])
+        setNomeMusica(currentMusic.nome)
+        audioRef.current = newAudio;
+        if (playing) {
+            newAudio.play();
+        }
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
+        };
+    }, [contadorMusica, playing]);
+
+    const passarMusica = () => {
+        setMusica(contadorMusica >= quantidadeMusicas ? 1 : contadorMusica + 1);
+    }
+
+    const voltarMusica = () => {
+        setMusica(contadorMusica <= 1 ? quantidadeMusicas : contadorMusica - 1);
+    }
+
+    const selecionarMusica = (/*i*/) => {
+        setMusica(contadorMusica /*= i*/);
+    }
 
     const configPlayPause = () => {
-        if(playing){
+        if (playing) {
             pause();
-        }
-        else{
+        } else {
             play();
         }
         setPlay(!playing);
     }
 
     const play = () => {
-        if (!audio) return;
-            audio.play();
-    }
-    const pause = () => {
-        if (!audio) return;
-            audio.pause();
+        if (audioRef.current) {
+            audioRef.current.play();
+        }
     }
 
-    const passarMusica = () => {
-        setMusica(contadorMusica >= quantidadeMusicas? 1: contadorMusica + 1);
-    }
-    const voltarMusica = () => {
-        setMusica(contadorMusica <= 1? quantidadeMusicas: contadorMusica - 1);
+    const pause = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
     }
 
     return (
-        <HomeConstext.Provider value={
-            {
-                playing, configPlayPause,
-                contadorMusica, passarMusica, voltarMusica,
-                quantidadeMusicas,
-            }
-        }>
-          {children}
-        </HomeConstext.Provider>
+        <HomeContext.Provider value={{
+            playing, configPlayPause,
+            contadorMusica, passarMusica, voltarMusica,
+            quantidadeMusicas, nomeMusica, selecionarMusica, 
+        }}>
+            {children}
+        </HomeContext.Provider>
     )
 }
 
