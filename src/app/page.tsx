@@ -15,29 +15,30 @@ export default function Home() {
 
   const {
     playing, configPlayPause,
-    nomeMusica, passarMusica, voltarMusica
+    nomeMusica, passarMusica, voltarMusica,
+    selecionarMusica
 
   } = context;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="flex flex-col items-center justify-center text-center">
-        <h1 className="text-[100px]">{nomeMusica}</h1>
+        <h1 className="text-[60px]">{nomeMusica}</h1>
         <div className="flex items-center">
           <button onClick={() => voltarMusica()}>
-            <GiPreviousButton className="text-[80px]" />
+            <GiPreviousButton className="text-[80px]"/>
           </button>
           <button onClick={() => configPlayPause()}>
-            {playing ? <GiPauseButton className="text-[80px]" /> : <GiPlayButton className="text-[80px]" />}
+            {playing ? <GiPauseButton className="text-[80px]"/> : <GiPlayButton className="text-[80px]"/>}
           </button>
           <button onClick={() => passarMusica()}>
-            <GiNextButton className="text-[80px]" />
+            <GiNextButton className="text-[80px]"/>
           </button>
         </div>
         <div className="flex flex-col items-center">
           {musics.map((music, i) => (
-            <button>
-              <div key={i} className="mb-2 cursor-pointer">
+            <button onClick={() => selecionarMusica(i)}>
+              <div key={i} className="hover:bg-blue-400">
                 <p className="text-[15px]">{music.nome}</p>
                 <p className="text-[10px]">{music.author}</p>
               </div>

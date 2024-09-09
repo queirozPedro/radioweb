@@ -11,7 +11,7 @@ type HomeContextData = {
     
     passarMusica: () => void;
     voltarMusica: () => void;
-    selecionarMusica: () => void;
+    selecionarMusica: (i: number) => void;
     configPlayPause: () => void;
 }
 
@@ -55,8 +55,8 @@ const HomeContextProvider = ({children}: ProviderProps) => {
         setMusica(contadorMusica <= 1 ? quantidadeMusicas : contadorMusica - 1);
     }
 
-    const selecionarMusica = (/*i*/) => {
-        setMusica(contadorMusica /*= i*/);
+    const selecionarMusica = (i: number) => {
+        setMusica(i);
     }
 
     const configPlayPause = () => {
