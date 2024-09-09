@@ -30,7 +30,7 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     const audioRef = useRef<HTMLAudioElement >();
     
     useEffect(() => {
-        const currentMusic = musics[contadorMusica]; 
+        const currentMusic = musics[contadorMusica >= musics.length? 0: contadorMusica]; 
         const newAudio = new Audio(currentMusic.urlAudio);
         setAudio(newAudio);
         setNomeMusica(currentMusic.nome)
