@@ -1,6 +1,6 @@
 'use client'
 
-import React, {createContext, ReactNode, useState} from 'react';
+import React, {createContext, ReactNode, useEffect, useState} from 'react';
 
 // Um tipo de dado que define quais dados e operações serão criados
 type HomeContextData = {
@@ -10,7 +10,7 @@ type HomeContextData = {
     
     passarMusica: () => void;
     voltarMusica: () => void;
-    playPause: () => void;
+    configPlayPause: () => void;
 }
 
 export const HomeConstext = createContext({} as HomeContextData);
@@ -24,10 +24,32 @@ const HomeContextProvider = ({children}:ProviderProps) => {
     const [playing, setPlay] = useState(false);
     const [contadorMusica, setMusica] = useState(1);
     const [quantidadeMusicas, setQuantMusicas] = useState(20);
+    const [audio, setAudio] = useState<HTMLAudioElement>();
     
-    const playPause = () => {
-        setPlay(playing? false: true);
+    useEffect(()=>{
+        const newAudio = new Audio("audios/KocchiNoKento.mp3");
+        setAudio(newAudio);
+    }, [])
+
+    const configPlayPause = () => {
+        if(playing){
+            pause();
+        }
+        else{
+            play();
+        }
+        setPlay(!playing);
     }
+
+    const play = () => {
+        if (!audio) return;
+            audio.play();
+    }
+    const pause = () => {
+        if (!audio) return;
+            audio.pause();
+    }
+
     const passarMusica = () => {
         setMusica(contadorMusica >= quantidadeMusicas? 1: contadorMusica + 1);
     }
@@ -38,9 +60,9 @@ const HomeContextProvider = ({children}:ProviderProps) => {
     return (
         <HomeConstext.Provider value={
             {
-                playing, playPause,
+                playing, configPlayPause,
                 contadorMusica, passarMusica, voltarMusica,
-                quantidadeMusicas
+                quantidadeMusicas,
             }
         }>
           {children}

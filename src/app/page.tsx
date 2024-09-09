@@ -10,7 +10,7 @@ import { GiPreviousButton } from "react-icons/gi";
 
 export default function Home() {
   const {
-    playing, playPause, 
+    playing, configPlayPause, 
     contadorMusica, passarMusica, voltarMusica
   } = useContext(HomeConstext);
 
@@ -22,7 +22,7 @@ export default function Home() {
         <button onClick={()=> voltarMusica()}>
           <GiPreviousButton className="text-[80px]"/>
         </button>
-        <button onClick={()=> playPause()}>
+        <button onClick={()=> configPlayPause()}>
           {playing? <GiPauseButton className="text-[80px]"/> : <GiPlayButton className="text-[80px]"/>}
         </button>
         <button onClick={()=> passarMusica()}>
