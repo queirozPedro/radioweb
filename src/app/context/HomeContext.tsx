@@ -8,11 +8,15 @@ type HomeContextData = {
     quantidadeMusicas: number;
     playing: boolean;
     nomeMusica: string
+    volume: number;
+    panner: number;
     
     passarMusica: () => void;
     voltarMusica: () => void;
+    configVolume: (value: number) => void;
     selecionarMusica: (i: number) => void;
     configPlayPause: () => void;
+    configPanner: (value: number) => void;
 }
 
 export const HomeContext = createContext<HomeContextData | undefined>(undefined); 
@@ -23,29 +27,21 @@ type ProviderProps = {
 
 const HomeContextProvider = ({children}: ProviderProps) => {    
     const [playing, setPlay] = useState(false);
+    const [volume, setVolume] = useState(1);
+    const [gain, setGain] = useState<GainNode>(); 
     const [contadorMusica, setMusica] = useState(0);
     const [quantidadeMusicas] = useState(musics.length); 
     const [audio, setAudio] = useState<HTMLAudioElement>(); 
     const [nomeMusica, setNomeMusica] = useState(""); 
-    const audioRef = useRef<HTMLAudioElement >();
+    const [stereo, setStereo] = useState<StereoPannerNode>();
+    const [panner, setPanner] = useState(0);
     
     useEffect(() => {
-        const currentMusic = musics[contadorMusica >= musics.length? 0: contadorMusica]; 
-        const newAudio = new Audio(currentMusic.urlAudio);
-        setAudio(newAudio);
-        setNomeMusica(currentMusic.nome)
-        audioRef.current = newAudio;
         if (playing) {
-            newAudio.play();
+            if(!audio) return;
+            audio.play();
         }
-
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
-            }
-        };
-    }, [contadorMusica, playing]);
+    }, [audio]);
 
     const passarMusica = () => {
         setMusica(contadorMusica >= quantidadeMusicas ? 1 : contadorMusica + 1);
@@ -57,6 +53,35 @@ const HomeContextProvider = ({children}: ProviderProps) => {
 
     const selecionarMusica = (i: number) => {
         setMusica(i);
+        const updatedAudio = new Audio(`${musics[i].urlAudio}`);
+        pause();
+        setAudio(updatedAudio);
+        const audioConext = new AudioContext();
+        const media = audioConext.createMediaElementSource(updatedAudio);
+        const updatedGain = audioConext.createGain();
+        const updatedStereo = audioConext.createStereoPanner();
+        media.connect(updatedGain);
+        updatedGain.connect(updatedStereo);
+        updatedStereo.connect(audioConext.destination);
+        
+        updatedAudio.onplay = () => {
+            audioConext.resume();
+        }
+
+        setGain(updatedGain);
+        setStereo(updatedStereo);
+    }
+
+    const configVolume = (value:number) => {
+        if (!gain) return;
+        gain.gain.value = value;
+        setVolume(value);
+    }
+
+    const configPanner = (value:number) => {
+        if (!stereo) return;
+        stereo.pan.value = value;
+        setPanner(value);
     }
 
     const configPlayPause = () => {
@@ -69,14 +94,14 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     }
 
     const play = () => {
-        if (audioRef.current) {
-            audioRef.current.play();
+        if (audio) {
+            audio.play();
         }
     }
 
     const pause = () => {
-        if (audioRef.current) {
-            audioRef.current.pause();
+        if (audio) {
+            audio.pause();
         }
     }
 
@@ -85,6 +110,9 @@ const HomeContextProvider = ({children}: ProviderProps) => {
             playing, configPlayPause,
             contadorMusica, passarMusica, voltarMusica,
             quantidadeMusicas, nomeMusica, selecionarMusica, 
+            volume, configVolume,
+            panner, configPanner
+
         }}>
             {children}
         </HomeContext.Provider>
