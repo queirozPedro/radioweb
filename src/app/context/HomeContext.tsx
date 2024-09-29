@@ -27,7 +27,7 @@ type ProviderProps = {
 
 const HomeContextProvider = ({children}: ProviderProps) => {    
     const [playing, setPlay] = useState(false);
-    const [volume, setVolume] = useState(1);
+    const [volume, setVolume] = useState(0.5);
     const [gain, setGain] = useState<GainNode>(); 
     const [musicIndex, setMusicIntex] = useState(0);
     const [quantidadeMusicas] = useState(musics.length); 
