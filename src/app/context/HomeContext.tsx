@@ -4,7 +4,7 @@ import React, { createContext, ReactNode, useEffect, useState, useRef } from 're
 import { musics } from '../dados/music';
 
 type HomeContextData = {
-    contadorMusica: number;
+    musicIndex: number;
     quantidadeMusicas: number;
     playing: boolean;
     nomeMusica: string
@@ -29,45 +29,66 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     const [playing, setPlay] = useState(false);
     const [volume, setVolume] = useState(1);
     const [gain, setGain] = useState<GainNode>(); 
-    const [contadorMusica, setMusica] = useState(0);
+    const [musicIndex, setMusicIntex] = useState(0);
     const [quantidadeMusicas] = useState(musics.length); 
     const [audio, setAudio] = useState<HTMLAudioElement>(); 
     const [nomeMusica, setNomeMusica] = useState(""); 
     const [stereo, setStereo] = useState<StereoPannerNode>();
     const [panner, setPanner] = useState(0);
     
-    useEffect(() => {
+    /**
+     * UseEffect um hook(gancho) que será executado sempre que o valor de áudio for alterado.
+     * Esse monitora o estado do aúdio e garante que ele esteja sempre tocando desde que exista um.
+     */
+    useEffect(() => {  
         if (playing) {
             if(!audio) return;
             audio.play();
         }
+        // Isso aqui é o efeito colateral da mudança no valor de áudio.
     }, [audio]);
+    // [audio] é a dependência do hook
 
     const passarMusica = () => {
-        setMusica(contadorMusica >= quantidadeMusicas ? 1 : contadorMusica + 1);
+        selecionarMusica(musicIndex + 1 >= quantidadeMusicas? 0: musicIndex + 1);
     }
 
     const voltarMusica = () => {
-        setMusica(contadorMusica <= 1 ? quantidadeMusicas : contadorMusica - 1);
+        selecionarMusica(musicIndex - 1 <= 0? quantidadeMusicas - 1: musicIndex - 1);
     }
 
     const selecionarMusica = (i: number) => {
-        setMusica(i);
+        // Seleciona uma música pelo indice i
+        setMusicIntex(i);
+        // Cria um objeto do tipo Audio
         const updatedAudio = new Audio(`${musics[i].urlAudio}`);
+        // Pausa a música
         pause();
+        // Atualiza o áudio
         setAudio(updatedAudio);
-        const audioConext = new AudioContext();
-        const media = audioConext.createMediaElementSource(updatedAudio);
-        const updatedGain = audioConext.createGain();
-        const updatedStereo = audioConext.createStereoPanner();
+        // Passa o nome da música
+        setNomeMusica(`${musics[i].nome}`)
+        // AudioContext é uma interface que permite a manipulação do áudio
+        const audioContext = new AudioContext();
+        // Serve como ponte entre o AudioContext e o elemento de áudio, um ponto de entrada.
+        const media = audioContext.createMediaElementSource(updatedAudio);
+        // Cria um nó de ganho, que permite aumentar e abaixar o volume da música.
+        const updatedGain = audioContext.createGain();
+        // Cria a manipulação do Stereo que permite controlar a quantidade de áudio dos lados.
+        const updatedStereo = audioContext.createStereoPanner();
+        // Conecta o ganho na mídia
         media.connect(updatedGain);
+        // Conecta o ganho ao canal Stereo
         updatedGain.connect(updatedStereo);
-        updatedStereo.connect(audioConext.destination);
+        // Conecta o áudio ao Stereo
+        updatedStereo.connect(audioContext.destination);
         
+        // Quando ouver o play, o áudio continua
         updatedAudio.onplay = () => {
-            audioConext.resume();
+            audioContext.resume();
         }
 
+        // Atualiza o estado do Gain e o do Stereo
         setGain(updatedGain);
         setStereo(updatedStereo);
     }
@@ -108,7 +129,7 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     return (
         <HomeContext.Provider value={{
             playing, configPlayPause,
-            contadorMusica, passarMusica, voltarMusica,
+            musicIndex, passarMusica, voltarMusica,
             quantidadeMusicas, nomeMusica, selecionarMusica, 
             volume, configVolume,
             panner, configPanner

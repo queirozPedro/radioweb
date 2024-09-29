@@ -17,7 +17,7 @@ export default function Home() {
     playing, configPlayPause,
     nomeMusica, passarMusica, voltarMusica,
     volume, selecionarMusica, configVolume,
-    panner, configPanner
+    panner, configPanner, musicIndex, quantidadeMusicas
 
   } = context;
 
@@ -26,18 +26,30 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="flex flex-col items-center justify-center text-center">
-        <h1 className="text-[60px]">{nomeMusica}</h1>
+    <main className="flex min-h-screen p-24">
+    <div className="flex w-full justify-between">
+      <div className="flex flex-col items-center justify-center text-center w-3/4">
+
+          {musics[musicIndex]?.image && (
+            <Image 
+              src={musics[musicIndex].image} 
+              alt={`Capa da música ${nomeMusica}`} 
+              width={300} // Largura da imagem
+              height={300} // Altura da imagem
+              className="rounded" // Estilização opcional
+            />
+          )}
+
+        <h1 className="text-[40px] mb-[30px]">{nomeMusica}</h1>
         <div className="flex items-center">
           <button onClick={() => voltarMusica()}>
-            <GiPreviousButton className="text-[80px]" />
+            <GiPreviousButton className="text-[50px]" />
           </button>
           <button onClick={() => configPlayPause()}>
-            {playing ? <GiPauseButton className="text-[80px]" /> : <GiPlayButton className="text-[80px]" />}
+            {playing ? <GiPauseButton className="text-[50px]" /> : <GiPlayButton className="text-[50px]" />}
           </button>
           <button onClick={() => passarMusica()}>
-            <GiNextButton className="text-[80px]" />
+            <GiNextButton className="text-[50px]" />
           </button>
         </div>
         
@@ -57,20 +69,22 @@ export default function Home() {
             value={panner}
             onChange={e => configPanner(Number(e.target.value))}
             step="0.01"
-          ></input>
-        </div>
-
-        <div className="flex flex-col items-center">
-          {musics.map((music, i) => (
-            <button onClick={() => selecionarMusica(i)}>
-              <div key={i} className="hover:bg-blue-400">
-                <p className="text-[15px]">{music.nome}</p>
-                <p className="text-[10px]">{music.author}</p>
-              </div>
-            </button>
-          ))}
+          />
         </div>
       </div>
-    </main>
+
+      <div className="flex flex-col items-start w-1/4 p-4 border-l border-gray-300 max-h-[400px] overflow-y-auto">
+        <h2 className="text-xl mb-4">Playlist</h2>
+        {musics.map((music, i) => (
+          <button onClick={() => selecionarMusica(i)} key={i} className="w-full">
+            <div className="hover:bg-blue-400 p-2 w-full text-left">
+              <p className="text-[15px]">{music.nome}</p>
+              <p className="text-[10px]">{music.author}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  </main>
   );
 }
