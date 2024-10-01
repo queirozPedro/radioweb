@@ -4,6 +4,7 @@ import Image from "next/image";
 import { HomeContext } from "./context/HomeContext";
 import { useContext, useEffect } from "react";
 import { BiPlayCircle, BiPauseCircle, BiSkipNextCircle, BiSkipPreviousCircle } from "react-icons/bi";
+import { HiMiniSpeakerWave, HiMiniSpeakerXMark  } from "react-icons/hi2";
 import { musics } from "./dados/music";
 
 export default function Home() {
@@ -17,7 +18,7 @@ export default function Home() {
     playing, configPlayPause,
     nomeMusica, passarMusica, voltarMusica,
     volume, selecionarMusica, configVolume,
-    panner, configPanner, musicIndex, quantidadeMusicas
+    panner, configPanner, musicIndex, mutarVolume
 
   } = context;
 
@@ -58,23 +59,31 @@ export default function Home() {
             </div>
 
             <div className="mt-[30px]">
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step="0.01"
-                value={volume}
-                onChange={(e) => configVolume(Number(e.target.value))}
-              />
-              <input
-              
-                type="range"
-                min="-1"
-                max="1"
-                value={panner}
-                onChange={e => configPanner(Number(e.target.value))}
-                step="0.01"
-              />
+              <div className="flex items-center justify-center mb-[5px] mt-[5px]">
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step="0.01"
+                  value={volume}
+                  onChange={(e) => configVolume(Number(e.target.value))}
+                />
+                <button onClick={() => mutarVolume()}>
+                  {volume > 0? <HiMiniSpeakerWave />: <HiMiniSpeakerXMark />}
+                </button>
+              </div>
+              <div className="flex items-center mb-[5px] mt-[5px]">
+                <p className="text-[15px] font-bold mr-[5px]" style={{ opacity: -panner + 0.5}}>L</p>
+                <input
+                  type="range"
+                  min="-1"
+                  max="1"
+                  value={panner}
+                  onChange={e => configPanner(Number(e.target.value))}                          
+                  step="0.01"
+                />
+                <p className="text-[15px] font-bold ml-[5px]" style={{ opacity: panner + 0.5}}>R</p>
+              </div>
             </div>
 
           </div>

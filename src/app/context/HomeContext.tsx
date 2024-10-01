@@ -5,17 +5,19 @@ import { musics } from '../dados/music';
 
 type HomeContextData = {
     musicIndex: number;
-    quantidadeMusicas: number;
+    quantMusicas: number;
     playing: boolean;
     nomeMusica: string
     volume: number;
+    oldVolume: number;
     panner: number;
     
     passarMusica: () => void;
     voltarMusica: () => void;
-    configVolume: (value: number) => void;
-    selecionarMusica: (i: number) => void;
+    mutarVolume: () => void;
     configPlayPause: () => void;
+    selecionarMusica: (i: number) => void;
+    configVolume: (value: number) => void;
     configPanner: (value: number) => void;
 }
 
@@ -28,9 +30,10 @@ type ProviderProps = {
 const HomeContextProvider = ({children}: ProviderProps) => {    
     const [playing, setPlay] = useState(false);
     const [volume, setVolume] = useState(0.5);
+    const [oldVolume, setOldVolume] = useState(0);
     const [gain, setGain] = useState<GainNode>(); 
     const [musicIndex, setMusicIntex] = useState(0);
-    const [quantidadeMusicas] = useState(musics.length); 
+    const [quantMusicas] = useState(musics.length); 
     const [audio, setAudio] = useState<HTMLAudioElement>(); 
     const [nomeMusica, setNomeMusica] = useState(""); 
     const [stereo, setStereo] = useState<StereoPannerNode>();
@@ -50,11 +53,20 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     // [audio] é a dependência do hook
 
     const passarMusica = () => {
-        selecionarMusica(musicIndex + 1 >= quantidadeMusicas? 0: musicIndex + 1);
+        selecionarMusica(musicIndex + 1 >= quantMusicas? 0: musicIndex + 1);
     }
 
     const voltarMusica = () => {
-        selecionarMusica(musicIndex - 1 <= 0? quantidadeMusicas - 1: musicIndex - 1);
+        selecionarMusica(musicIndex - 1 <= 0? quantMusicas - 1: musicIndex - 1);
+    }
+
+    const mutarVolume = () => {
+        if(volume > 0){
+            setOldVolume(volume)
+            configVolume(0)
+        } else if(oldVolume > 0){
+            configVolume(oldVolume)
+        }
     }
 
     const selecionarMusica = (i: number) => {
@@ -130,9 +142,10 @@ const HomeContextProvider = ({children}: ProviderProps) => {
         <HomeContext.Provider value={{
             playing, configPlayPause,
             musicIndex, passarMusica, voltarMusica,
-            quantidadeMusicas, nomeMusica, selecionarMusica, 
+            quantMusicas, nomeMusica, selecionarMusica, 
             volume, configVolume,
-            panner, configPanner
+            panner, configPanner,
+            mutarVolume, oldVolume
 
         }}>
             {children}
