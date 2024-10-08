@@ -18,7 +18,8 @@ export default function Home() {
     playing, configPlayPause,
     nomeMusica, passarMusica, voltarMusica,
     volume, selecionarMusica, configVolume,
-    panner, configPanner, musicIndex, mutarVolume
+    panner, configPanner, musicIndex, mutarVolume,
+    duracao, tempoAtual, controlarTempo
 
   } = context;
 
@@ -40,11 +41,19 @@ export default function Home() {
                   alt={`Capa da música ${nomeMusica}`}
                   width={300}
                   height={300}
-                  className="rounded"
+                  className="h-32 w-auto rounded"
                 />
               )}
             <h1 className="text-[20px] mb-[30px] mt-[20px]">{nomeMusica}</h1>
+            <input type="range"
+            min="0"
+            max={duracao}
+            value={tempoAtual}
+            onChange={(e) => controlarTempo(Number(e.target.value))}
+          />
+          <p className="opacity-80, tracking-wide">{Math.floor(tempoAtual / 60)+":"+(Math.floor(tempoAtual) % 60).toString().padStart(2, '0')} / {Math.floor(duracao / 60)+":"+(Math.floor(duracao) % 60).toString().padStart(2, '0')}</p>
             </div>
+
 
             <div className="flex items-center">
               <button onClick={() => voltarMusica()}>
@@ -68,21 +77,21 @@ export default function Home() {
                   value={volume}
                   onChange={(e) => configVolume(Number(e.target.value))}
                 />
-                <button onClick={() => mutarVolume()}>
+                <button onClick={() => mutarVolume()} className="ml-[5px]">
                   {volume > 0? <HiMiniSpeakerWave />: <HiMiniSpeakerXMark />}
                 </button>
               </div>
               <div className="flex items-center mb-[5px] mt-[5px]">
-                <p className="text-[15px] font-bold mr-[5px]" style={{ opacity: -panner + 0.5}}>L</p>
+                <p className="text-[15px] font-bold mr-[5px]" style={{ opacity: -panner + 0.8}}>L</p>
                 <input
                   type="range"
-                  min="-1"
+                  min="-0.8"
                   max="1"
                   value={panner}
                   onChange={e => configPanner(Number(e.target.value))}                          
-                  step="0.01"
+                  step="0.05"
                 />
-                <p className="text-[15px] font-bold ml-[5px]" style={{ opacity: panner + 0.5}}>R</p>
+                <p className="text-[15px] font-bold ml-[5px]" style={{ opacity: panner + 0.8}}>R</p>
               </div>
             </div>
 

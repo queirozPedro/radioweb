@@ -11,14 +11,17 @@ type HomeContextData = {
     volume: number;
     oldVolume: number;
     panner: number;
+    tempoAtual: number;
+    duracao: number;
     
+    mutarVolume: () => void;
     passarMusica: () => void;
     voltarMusica: () => void;
-    mutarVolume: () => void;
     configPlayPause: () => void;
     selecionarMusica: (i: number) => void;
     configVolume: (value: number) => void;
     configPanner: (value: number) => void;
+    controlarTempo: (value: number) => void;
 }
 
 export const HomeContext = createContext<HomeContextData | undefined>(undefined); 
@@ -38,6 +41,8 @@ const HomeContextProvider = ({children}: ProviderProps) => {
     const [nomeMusica, setNomeMusica] = useState(""); 
     const [stereo, setStereo] = useState<StereoPannerNode>();
     const [panner, setPanner] = useState(0);
+    const [tempoAtual, setTempoAtual] = useState(0);
+    const [duracao, setDuracao] = useState(0);
     
     /**
      * UseEffect um hook(gancho) que será executado sempre que o valor de áudio for alterado.
@@ -48,16 +53,31 @@ const HomeContextProvider = ({children}: ProviderProps) => {
             if(!audio) return;
             audio.play();
         }
+        if(audio){
+            audio.onloadedmetadata = () => {
+                setDuracao(audio.duration)
+            }
+            audio.ontimeupdate = () => {
+                setTempoAtual(audio.currentTime)
+            }
+        }
         // Isso aqui é o efeito colateral da mudança no valor de áudio.
     }, [audio]);
     // [audio] é a dependência do hook
+
+    const controlarTempo = (value: number) => {
+        if(audio){
+            audio.currentTime = value
+            setTempoAtual(value)
+        }
+    }
 
     const passarMusica = () => {
         selecionarMusica(musicIndex + 1 >= quantMusicas? 0: musicIndex + 1);
     }
 
     const voltarMusica = () => {
-        selecionarMusica(musicIndex - 1 <= 0? quantMusicas - 1: musicIndex - 1);
+        selecionarMusica(musicIndex - 1 < 0? quantMusicas - 1: musicIndex - 1);
     }
 
     const mutarVolume = () => {
@@ -145,8 +165,8 @@ const HomeContextProvider = ({children}: ProviderProps) => {
             quantMusicas, nomeMusica, selecionarMusica, 
             volume, configVolume,
             panner, configPanner,
-            mutarVolume, oldVolume
-
+            mutarVolume, oldVolume,
+            duracao, tempoAtual, controlarTempo,
         }}>
             {children}
         </HomeContext.Provider>
